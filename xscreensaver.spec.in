@@ -164,7 +164,11 @@ BuildRequires:   %{default_text}
 %endif
 # For https://fedoraproject.org/wiki/Packaging:Perl#Build_Dependencies
 # https://fedoraproject.org/wiki/Changes/Build_Root_Without_Perl
+%if 0%{?fedora} == 23
+BuildRequires:    perl
+%else
 BuildRequires:    perl-interpreter
+%endif
 BuildRequires:    perl-generators
 # For --with-login-manager option
 %if 0%{?fedora} >= 14
