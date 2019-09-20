@@ -37,7 +37,6 @@
 
 %undefine        _changelog_trimtime
 
-Buildroot:       %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
 Summary:         X screen saver and locker
 Name:            %{name}
@@ -45,7 +44,6 @@ Version:         %{mainversion}
 Release:         %{fedora_rel}%{?dist}%{?extrarel}
 Epoch:           1
 License:         MIT
-Group:           Amusements/Graphics
 URL:             http://www.jwz.org/xscreensaver/
 Source0:         http://www.jwz.org/xscreensaver/xscreensaver-%{mainversion}%{?beta_ver}.tar.gz
 %if %{modular_conf}
@@ -76,8 +74,6 @@ Patch51:         xscreensaver-5.12-test-passwd-segv-tty.patch
 %global PATCH52_desc \
 # patch to compile driver/test-xdpms
 Patch52:         xscreensaver-5.12-tests-miscfix.patch
-# open new window for man when using gnome-terminal
-Patch61:         xscreensaver-5.42-0061-open-new-window-for-man-when-using-gnome-terminal.patch
 # 
 # reset_strip: kill gcc7 -Wint-in-bool-context
 Patch3603:       xscreensaver-5.36-0003-reset_strip-kill-gcc7-Wint-in-bool-context.patch
@@ -85,8 +81,10 @@ Patch3603:       xscreensaver-5.36-0003-reset_strip-kill-gcc7-Wint-in-bool-conte
 Patch3604:       xscreensaver-5.36-0004-init_crystal-kill-gcc7-Wint-in-bool-context.patch
 # misc: kill gcc warn_unused_result warnings
 Patch3607:       xscreensaver-5.36-0007-misc-kill-gcc-warn_unused_result-warnings.patch
-# fontglide.c: forbit C++ style comment
-Patch4201:       xscreensaver-5.42-0001-fontglide.c-forbit-C-style-comment.patch
+# open new window for man when using gnome-terminal
+Patch4261:       xscreensaver-5.42-0061-open-new-window-for-man-when-using-gnome-terminal.patch
+# glhanoi: fix malloc size shortage
+Patch4301:       xscreensaver-5.43-0001-glhanoi-fix-malloc-size-shortage.patch
 # 
 # Debugging patch
 # Not apply by default
@@ -100,7 +98,6 @@ Requires:        xscreensaver-gl-extras = %{epoch}:%{version}-%{release}
 
 %package base
 Summary:         A minimal installation of xscreensaver
-Group:           Amusements/Graphics
 
 %if 0%{?use_clang_analyze} >= 1
 BuildRequires:   clang-analyzer
@@ -190,7 +187,6 @@ Obsoletes:       xscreeensaver-tests < %{epoch}:%{version}-%{release}
 
 %package extras-base
 Summary:         A base package for screensavers
-Group:           Amusements/Graphics
 %if 0%{?fedora} < 19
 Requires:        %{name}-base = %{epoch}:%{version}-%{release}
 %endif
@@ -199,7 +195,6 @@ Requires:        xorg-x11-resutils
 
 %package extras
 Summary:         An enhanced set of screensavers
-Group:           Amusements/Graphics
 %if 0%{?fedora} >= 19
 # Does not available on EPEL7
 BuildRequires:   desktop-backgrounds-basic
@@ -213,12 +208,10 @@ Requires:        %{name}-extras-base = %{epoch}:%{version}-%{release}
 
 %package gl-base
 Summary:         A base package for screensavers that require OpenGL
-Group:           Amusements/Graphics
 Requires:        %{name}-base = %{epoch}:%{version}-%{release}
 
 %package gl-extras
 Summary:         An enhanced set of screensavers that require OpenGL
-Group:           Amusements/Graphics
 Provides:        xscreensaver-gl = %{epoch}:%{version}-%{release}
 Obsoletes:       xscreensaver-gl <= 1:5.00
 BuildRequires:   libGL-devel
@@ -234,26 +227,21 @@ Requires:        %{name}-extras-base = %{epoch}:%{version}-%{release}
 
 %package extras-gss
 Summary:         Desktop files of extras for other screensaver
-Group:           Amusements/Graphics
 Requires:        %{name}-extras = %{epoch}:%{version}-%{release}
 
 %package gl-extras-gss
 Summary:         Desktop files of gl-extras for other screensaver
-Group:           Amusements/Graphics
 Requires:        %{name}-gl-extras = %{epoch}:%{version}-%{release}
 
 %package tests
 Summary:         Test programs related to XScreenSaver
-Group:           Development/Debuggers
 Requires:        %{name}-base = %{epoch}:%{version}-%{release}
 
 %package clang-analyze
 Summary:         Clang analyze result log
-Group:           Development/Debuggers
 
 %package cppcheck
 Summary:         cppcheck result log
-Group:           Development/Debuggers
 
 
 %description
@@ -365,12 +353,11 @@ find . -name \*.c -exec chmod ugo-x {} \;
 %patch52 -p1
   %__git commit -m "%PATCH52_desc" -a
 
-%__cat %PATCH61   | %__git am
-
 %__cat %PATCH3603 | %__git am
 %__cat %PATCH3604 | %__git am
 #%%__cat %PATCH3607 | %__git am
-%__cat %PATCH4201 | %__git am
+%__cat %PATCH4261 | %__git am
+%__cat %PATCH4301 | %__git am
 
 #%%__cat %PATCH13501 | %%__git am
 

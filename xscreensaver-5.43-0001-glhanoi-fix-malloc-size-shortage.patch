@@ -1,0 +1,77 @@
+From 0f318c5042c3bec3b139acadcc75ad3c3de8187c Mon Sep 17 00:00:00 2001
+From: Mamoru TASAKA <mtasaka@fedoraproject.org>
+Date: Tue, 27 Aug 2019 15:13:50 +0900
+Subject: [PATCH] glhanoi: fix malloc size shortage
+
+5.43 glhanoi segfaults like:
+    #0 0x7f87473de5ef  (/lib64/libasan.so.5+0x9b5ef)
+    #1 0x7f8741e2cd1e  (/usr/lib64/dri/swrast_dri.so+0x138d1e)
+    #2 0x7f8742655025  (/usr/lib64/dri/swrast_dri.so+0x961025)
+    #3 0x7f87421f4b8f  (/usr/lib64/dri/swrast_dri.so+0x500b8f)
+    #4 0x7f87421f5a96  (/usr/lib64/dri/swrast_dri.so+0x501a96)
+    #5 0x7f87421b8ca2  (/usr/lib64/dri/swrast_dri.so+0x4c4ca2)
+    #6 0x7f87421ba7e1  (/usr/lib64/dri/swrast_dri.so+0x4c67e1)
+    #7 0x41c371 in makeTextures ../../../hacks/glx/glhanoi.c:1560
+    #8 0x422032 in init_glhanoi ../../../hacks/glx/glhanoi.c:1927
+    #9 0x438a34 in xlockmore_do_init ../../hacks/xlockmore.c:576
+    #10 0x438de7 in xlockmore_check_init ../../hacks/xlockmore.c:603
+    #11 0x439b69 in xlockmore_event ../../hacks/xlockmore.c:679
+    #12 0x427983 in screenhack_table_handle_events ../../hacks/screenhack.c:469
+    #13 0x427cfd in usleep_and_process_events ../../hacks/screenhack.c:526
+    #14 0x428031 in run_screenhack_table ../../hacks/screenhack.c:586
+    #15 0x42ae48 in main ../../hacks/screenhack.c:987
+    #16 0x7f874632af32 in __libc_start_main (/lib64/libc.so.6+0x23f32)
+    #17 0x406e9d in _start
+
+Actually this is because of malloced buffer size shortage in makeTexture().
+As we use GL_RGBA format, we must assign 4 bytes per element.
+Also, casting from (GLubyte *) to (GLuint *) (i.e. possibly pointer with larger
+aligment) should be avoided. To avoid this, declare textureData as
+(GLuint *) first, then cast it to  (GLubyte *) when return.
+(Note buffer returned by malloc is guarateed to be casted to any basic type.)
+---
+ hacks/glx/glhanoi.c | 9 +++++----
+ 1 file changed, 5 insertions(+), 4 deletions(-)
+
+diff --git a/hacks/glx/glhanoi.c b/hacks/glx/glhanoi.c
+index 46cdc68..68126cf 100644
+--- a/hacks/glx/glhanoi.c
++++ b/hacks/glx/glhanoi.c
+@@ -1424,13 +1424,14 @@ static GLubyte *makeTexture(glhcfg *glhanoi, int x_size, int y_size, int z_size,
+ 									   tex_col_t *), tex_col_t * colours)
+ {
+ 	int i, j, k;
+-	GLubyte *textureData;
++	GLuint *textureData;
+ 	GLuint *texturePtr;
+ 	double x, y, z;
+ 	double xi, yi, zi;
+ 
++	/* As we use GL_RGBA format, we must assign 4 bytes per element */
+ 	if((textureData =
+-		calloc(x_size * y_size * z_size, sizeof(GLubyte))) == NULL) {
++		calloc(x_size * y_size * z_size, sizeof(GLuint))) == NULL) {
+ 		return NULL;
+ 	}
+ 
+@@ -1439,7 +1440,7 @@ static GLubyte *makeTexture(glhcfg *glhanoi, int x_size, int y_size, int z_size,
+ 	zi = 1.0 / z_size;
+ 
+ 	z = 0.0;
+-	texturePtr = (void *)textureData;
++	texturePtr = textureData;
+ 	for(k = 0; k < z_size; k++, z += zi) {
+ 		y = 0.0;
+ 		for(j = 0; j < y_size; j++, y += yi) {
+@@ -1450,7 +1451,7 @@ static GLubyte *makeTexture(glhcfg *glhanoi, int x_size, int y_size, int z_size,
+ 			}
+ 		}
+ 	}
+-	return textureData;
++	return (GLubyte *)textureData;
+ }
+ 
+ static void freeTexCols(tex_col_t*p)
+-- 
+2.21.0
+
