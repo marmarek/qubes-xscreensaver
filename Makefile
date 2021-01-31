@@ -1,6 +1,9 @@
 VERSION := $(shell cat version)
 URL := https://www.jwz.org/xscreensaver/xscreensaver-$(VERSION).tar.gz
 
+# upstream remove most of the archives, use our own mirror to have reliable builds
+URL := https://ftp.qubes-os.org/distfiles/$(notdir $(URL))
+
 SRC_FILE = $(notdir $(URL))
 
 UNTRUSTED_SUFF := .UNTRUSTED
