@@ -1,6 +1,19 @@
---- xscreensaver-5.35/hacks/config/webcollage.xml.nonet	2016-04-08 11:15:38.000000000 +0900
-+++ xscreensaver-5.35/hacks/config/webcollage.xml	2016-05-26 23:47:38.000000000 +0900
-@@ -28,8 +28,8 @@
+From b04424419b281e608bac2a600bf7aab0c65b164a Mon Sep 17 00:00:00 2001
+From: XScreenSaver owners <xscreensaver-owner@fedoraproject.org>
+Date: Tue, 24 Mar 2020 13:29:14 +0900
+Subject: [PATCH] # Change webcollage not to access to net # Also see bug
+ 472061
+
+---
+ hacks/config/webcollage.xml | 7 ++++++-
+ hacks/webcollage.man        | 5 +++++
+ 2 files changed, 11 insertions(+), 1 deletion(-)
+
+diff --git a/hacks/config/webcollage.xml b/hacks/config/webcollage.xml
+index c26ea98..da312fa 100644
+--- a/hacks/config/webcollage.xml
++++ b/hacks/config/webcollage.xml
+@@ -30,8 +30,8 @@
    <string id="filter"  _label="Per-image filter program" arg="-filter %"/>
    <string id="filter2" _label="Overall filter program" arg="-filter2 %"/>
    <file id="dictionary" _label="Dictionary file" arg="-dictionary %"/>
@@ -10,7 +23,7 @@
  
    <xscreensaver-updater />
  
-@@ -49,6 +49,11 @@
+@@ -51,6 +51,11 @@ Please act accordingly.
  
  See also https://www.jwz.org/webcollage/
  
@@ -22,9 +35,11 @@
  Written by Jamie Zawinski; 1999.
    </_description>
  </screensaver>
---- xscreensaver-5.26/hacks/webcollage.man.nonet	2009-10-14 06:12:31.000000000 +0900
-+++ xscreensaver-5.26/hacks/webcollage.man	2013-12-10 13:40:38.139050305 +0900
-@@ -178,6 +178,11 @@
+diff --git a/hacks/webcollage.man b/hacks/webcollage.man
+index 82bf5d7..7860d2e 100644
+--- a/hacks/webcollage.man
++++ b/hacks/webcollage.man
+@@ -178,6 +178,11 @@ the given directory.
  .TP 8
  .B \-fps
  Display the current frame rate and CPU load (MacOS only).
@@ -36,3 +51,6 @@
  .SH ENVIRONMENT
  .PP
  .TP 8
+-- 
+2.25.2
+
