@@ -79,6 +79,11 @@ Source13:        xscreensaver-newlogin-wrapper
 ##
 # bug 129335
 Patch1:          xscreensaver-5.45-0001-barcode-glsnake-sanitize-the-names-of-modes.patch
+
+%global PATCH2_desc \
+# remove Easter egg about version
+Patch2:          90_remove_Easter_egg_about_version.patch
+
 ## Patches already sent to the upsteam
 ## Patches which must be discussed with upstream
 # See bug 472061
@@ -374,6 +379,8 @@ find . -name \*.c -exec chmod ugo-x {} \;
 %__git commit -m "base" -q
 
 %__cat %PATCH1 | %__git am
+%patch2 -p1
+  %__git commit -m "%PATCH2_desc" -a
 %__cat %PATCH21 | %__git am
 %__cat %PATCH52 | %__git am
 
