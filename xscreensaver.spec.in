@@ -533,6 +533,11 @@ sed -i.delay -e 's|60 \* 15|20|' driver/test-grab.c
 sed -i 's|-Wunknown-warning-option|-Wfoo-bar-baz|' ax_pthread.m4
 %__git commit -m "Really use unknowing warning option" -a
 
+%global PATCH_desc \
+# Call hacks via a full path - avoid calling something accidentally with the same name instead
+sed -i.hackdir -e 's:[^ 	]* -root:@HACKDIR_FULL@/\0:' \
+    driver/XScreenSaver.ad.in
+%__git commit -m "%PATCH_desc" -a
 
 aclocal
 autoconf
