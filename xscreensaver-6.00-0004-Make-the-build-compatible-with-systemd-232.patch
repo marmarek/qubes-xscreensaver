@@ -1,0 +1,61 @@
+From ad311a59fbf062be08567be691529a2dc5832f85 Mon Sep 17 00:00:00 2001
+From: XScreenSaver owners <xscreensaver-owner@fedoraproject.org>
+Date: Thu, 13 May 2021 05:36:25 +0200
+Subject: [PATCH] Make the build compatible with systemd < 232
+
+"recursive" mode of sd_bus_track is not available there yet
+---
+ configure.ac                  | 12 ++++++++++++
+ driver/xscreensaver-systemd.c |  4 ++++
+ 2 files changed, 16 insertions(+)
+
+diff --git a/configure.ac b/configure.ac
+index c3f0b5b..d8a81c6 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -126,6 +126,9 @@ AH_TEMPLATE([HAVE_XKB],
+ AH_TEMPLATE([HAVE_LIBSYSTEMD],
+ 	    [Define this if you have libsystemd.])
+ 
++AH_TEMPLATE([HAVE_LIBSYSTEMD_TRACK],
++	    [Define this if libsystemd has recursive track feature.])
++
+ AH_TEMPLATE([HAVE_PROC_INTERRUPTS],
+ 	    [Define this if you have a Linux-like /proc/interrupts file which
+ 	    can be examined to determine when keyboard activity has
+@@ -2137,6 +2140,15 @@ else
+   SYSTEMD_LIBS=''
+ fi
+ 
++if test "$have_systemd" = yes; then
++  have_sd_bus_track=no
++  AC_CHECK_X_LIB(c, sd_bus_track_count_name,
++                 [have_sd_bus_track=yes],,
++                 $ac_systemd_config_libs -lX11 -lXext -lm)
++  if test "$have_sd_bus_track" = yes; then
++    AC_DEFINE(HAVE_LIBSYSTEMD_TRACK)
++  fi
++fi
+ 
+ ###############################################################################
+ #
+diff --git a/driver/xscreensaver-systemd.c b/driver/xscreensaver-systemd.c
+index 4d9a6fa..174ffa5 100644
+--- a/driver/xscreensaver-systemd.c
++++ b/driver/xscreensaver-systemd.c
+@@ -853,8 +853,12 @@ xscreensaver_systemd_loop (void)
+        program was re-launched, since the new instance won't have the
+        same cookie. */
+     SLIST_FOREACH (entry, &inhibit_head, entries) {
++#ifdef HAVE_LIBSYSTEMD_TRACK
+       if (entry->peer &&
+           !sd_bus_track_count_name (ctx->track, entry->peer)) {
++#else
++      if (0) { /* systemd too old to detect this case :/ */
++#endif
+         if (verbose_p)
+           fprintf (stderr,
+                    "%s: peer %s for inhibiting app \"%s\" has died:"
+-- 
+2.31.1
+

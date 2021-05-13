@@ -1,0 +1,30 @@
+From 9b713a06ad123e8d4bba7c08421511b238da2e10 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Marek=20Marczykowski-G=C3=B3recki?=
+ <marmarek@invisiblethingslab.com>
+Date: Thu, 13 May 2021 04:53:33 +0200
+Subject: [PATCH] mute false positive -Wmaybe-uninitialized in old gcc
+
+False positive in gcc 6.4.1
+
+diff --git a/driver/demo-Gtk.c b/driver/demo-Gtk.c
+index a6fb970..1f0ee94 100644
+--- a/driver/demo-Gtk.c
++++ b/driver/demo-Gtk.c
+@@ -1640,7 +1640,7 @@ flush_dialog_changes_and_save (state *s)
+     char *themes = get_string_resource (dpy, "themeNames", "ThemeNames");
+     int menu_index = gtk_combo_box_get_active (cbox);
+     char *token = themes;
+-    char *name, *last;
++    char *name = NULL, *last;
+     int i = 0;
+     while ((name = strtok_r (token, ",", &last)))
+       {
+@@ -2869,7 +2869,7 @@ populate_prefs_page (state *s)
+       {
+         char *themes = get_string_resource (dpy, "themeNames", "ThemeNames");
+         char *token = themes;
+-        char *name, *name2, *last;
++        char *name = NULL, *name2, *last;
+         GtkListStore *model;
+         GtkTreeIter iter;
+         int i = 0;

@@ -89,6 +89,8 @@ Patch1:          xscreensaver-5.45-0001-barcode-glsnake-sanitize-the-names-of-mo
 Patch2:          90_remove_Easter_egg_about_version.patch
 
 Patch3:          xscreensaver-5.45-0008-Allow-empty-reason-for-dbus-Inhibit-method.patch
+Patch4:          xscreensaver-6.00-0002-gcc-warn-maybe-uninitialized.patch
+Patch5:          xscreensaver-6.00-0004-Make-the-build-compatible-with-systemd-232.patch
 
 ## Patches already sent to the upsteam
 ## Patches which must be discussed with upstream
@@ -373,6 +375,8 @@ find . -name \*.c -exec chmod ugo-x {} \;
 %patch2 -p1
   %__git commit -m "%PATCH2_desc" -a
 %__cat %PATCH3 | %__git am
+%__cat %PATCH4 | %__git am
+%__cat %PATCH5 | %__git am
 %__cat %PATCH21 | %__git am
 
 #%%__cat %PATCH3607 | %__git am
