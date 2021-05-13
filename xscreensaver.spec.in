@@ -1,7 +1,8 @@
 %define name          xscreensaver
 
 %define mainversion   @VERSION@
-%define beta_ver      %{nil}
+#%%define beta_ver      b2
+%undefine beta_ver
 
 
 %define modular_conf  1
@@ -10,7 +11,7 @@
 %define split_getimage   1
 %endif
 
-%define fedora_rel    4
+%define fedora_rel    0.1
 
 %global use_clang_as_cc 0
 %global use_clang_analyze 0
@@ -18,14 +19,16 @@
 %global use_gcc_strict_sanitize 0
 %global use_gcc_trap_on_sanitize 0
 %global use_gcc_analyzer 0
+
+%global enable_animation 1
 %undefine extrarel
 
 %global flagrel %{nil}
 %if 0%{?use_cppcheck} >= 1
-%global flagrel %{flagrel}.cppcheck
+%global flagrel %{flagrel}.CPPCHECK
 %endif
 %if 0%{?use_gcc_strict_sanitize} >= 1
-%global flagrel %{flagrel}.san
+%global flagrel %{flagrel}.SAN
 %endif
 
 
@@ -60,7 +63,7 @@
 Summary:         X screen saver and locker
 Name:            %{name}
 Version:         %{mainversion}
-Release:         %{fedora_rel}%{flagrel}%{?dist}%{?extrarel}
+Release:         %{?beta_ver:0.}%{fedora_rel}%{?beta_ver:.%beta_ver}%{flagrel}%{?dist}%{?extrarel}
 Epoch:           1
 License:         MIT
 URL:             http://www.jwz.org/xscreensaver/
@@ -74,6 +77,7 @@ Source12:        xscreensaver-autostart.desktop
 %endif
 # wrapper script for switching user (bug 1878730)
 Source13:        xscreensaver-newlogin-wrapper
+Source100:       ja.po
 ##
 ## Patches
 ##
@@ -90,29 +94,12 @@ Patch3:          xscreensaver-5.45-0008-Allow-empty-reason-for-dbus-Inhibit-meth
 ## Patches which must be discussed with upstream
 # See bug 472061
 Patch21:         xscreensaver-5.35-webcollage-default-nonet.patch
-# Patch to compile driver/test-xdpms
-Patch52:         xscreensaver-5.44-0002-Patch-to-compile-driver-test-xdpms.patch
 # 
 # misc: kill gcc warn_unused_result warnings
 Patch3607:       xscreensaver-5.36-0007-misc-kill-gcc-warn_unused_result-warnings.patch
-# open new window for man when using gnome-terminal
-Patch4261:       xscreensaver-5.42-0061-open-new-window-for-man-when-using-gnome-terminal.patch
-# test-password.c: add skel definition for clientmessage_response
-Patch4501:      xscreensaver-5.45-1001-test-password.c-add-skel-definition-for-clientmessa.patch
-# asm6502.c/immediate: readd free() call accidentally removed during gcc warnings fix
-Patch4502:      xscreensaver-5.45-0002-asm6502.c-immediate-readd-free-call-accidentally-rem.patch
-# beats/draw_beats: avoid integer overflow by multiplication
-Patch4503:      xscreensaver-5.45-0003-beats-draw_beats-avoid-integer-overflow-by-multiplic.patch
-# xscreensaver-systemd: fix blurb strncpy
-Patch4504:      xscreensaver-5.45-0004-xscreensaver-systemd-fix-blurb-strncpy.patch
-# recanim.c: fix up -Wformat-overflow warning
-Patch4505:      xscreensaver-5.45-0005-recanim.c-fix-up-Wformat-overflow-warning.patch
-# asm6502.c/newAsmLine: shut up -Wstringop warning
-Patch4506:      xscreensaver-5.45-0006-asm6502.c-newAsmLine-shut-up-Wstringop-warning.patch
-# lock.c/draw_passwd_window: show logo and ok button
-Patch4507:      xscreensaver-5.45-0007-lock.c-draw_passwd_window-show-logo-and-ok-button.patch
-# test-screens.c: add skel XA_SCREENSAVER_VERSION definition
-Patch4551:      xscreensaver-5.45-0051-test-screens.c-add-skel-XA_SCREENSAVER_VERSION-defin.patch
+# Fedora specific
+# window_init: search parenthesis first for searching year
+Patch4601:       xscreensaver-6.00-0001-screensaver_id-search-parenthesis-first-for-searchin.patch
 #
 # gcc warning cleanup
 # Some cppcheck cleanup
@@ -165,11 +152,14 @@ BuildRequires:   libgle-devel
 %endif
 BuildRequires:   libX11-devel
 BuildRequires:   libXScrnSaver-devel
+# xscreensaver 6.00
+#BuildRequires:   libXcomposite-devel
 BuildRequires:   libXext-devel
 # From xscreensaver 5.12, write explicitly
 BuildRequires:   libXi-devel
 BuildRequires:   libXinerama-devel
-BuildRequires:   libXmu-devel
+# Dropped from 6.00
+# BuildRequires:   libXmu-devel
 # xscreensaver 5.39: check if the following can be removed
 BuildRequires:   libXpm-devel
 # xscreensaver 5.39
@@ -215,7 +205,6 @@ Requires:        xdg-utils
 %if ! %{split_getimage}
 Requires:        appres
 %endif
-Requires:        xorg-x11-fonts-ISO8859-1-100dpi
 # For switch user wrapper
 Requires:        %{_bindir}/pidof
 %if 0%{?build_tests} < 1
@@ -385,19 +374,9 @@ find . -name \*.c -exec chmod ugo-x {} \;
   %__git commit -m "%PATCH2_desc" -a
 %__cat %PATCH3 | %__git am
 %__cat %PATCH21 | %__git am
-%__cat %PATCH52 | %__git am
 
 #%%__cat %PATCH3607 | %__git am
-%__cat %PATCH4261 | %__git am
-
-%__cat %PATCH4501 | %__git am
-%__cat %PATCH4502 | %__git am
-%__cat %PATCH4503 | %__git am
-%__cat %PATCH4551 | %__git am
-%__cat %PATCH4504 | %__git am
-%__cat %PATCH4505 | %__git am
-%__cat %PATCH4506 | %__git am
-%__cat %PATCH4507 | %__git am
+%__cat %PATCH4601 | %__git am
 
 #%%__cat %PATCH13501 | %%__git am
 
@@ -440,7 +419,9 @@ silence_hack(){
 %global PATCH_desc \
 # change some files to UTF-8
 for f in \
+%if 0
    driver/XScreenSaver.ad.in \
+%endif
    hacks/glx/sproingies.man \
    ; do
    iconv -f ISO-8859-1 -t UTF-8 $f > $f.tmp || cp -p $f $f.tmp
@@ -491,8 +472,8 @@ eval sed -i.date \
 eval sed -i.ver \
    -e \'s\|\(\[0-9\].\*-.\*-20\[0-9\]\[0-9\]\)\|\(`LANG=C LC_ALL=C \
       date -u +'%%d-%%b-%%Y'`\)\|g\' \
-   -e \'s\|\\\(5.\[0-9\]\[0-9\]\\\)[a-z]\[0-9\]\[0-9\]\*\|\\\1\|\' \
-   -e \'s\|5.\[0-9\]\[0-9\]\|%{version}-`echo %{release} | \
+   -e \'s\|\\\([56]\\\.\[0-9\]\[0-9\]\\\)[a-z]\[0-9\]\[0-9\]\*\|\\\1\|\' \
+   -e \'s\|[56]\\\.\[0-9\]\[0-9\]\|%{version}-`echo %{release} | \
       sed -e '/IGNORE THIS/s|\.[a-zA-Z][a-zA-Z0-9].*$||'`\|\' \
    utils/version.h
 %__git commit -m "%PATCH_desc" -a
@@ -535,20 +516,8 @@ sed -i.icon -e 's|xscreensaver\.xpm|xscreensaver|' \
 %__git commit -m "%PATCH_desc" -a || echo "Nothing changed"
 
 %global PATCH_desc \
-# Disable (don't build) some tests \
-# apm: doesn't compile \
-# mlstring: causes OOM - need check again
-sed -i.test \
-   -e 's|test-apm[ \t][ \t]*t|t|' \
-%if 0
-   -e 's|test-mlstring[ \t][ \t]*t|t|' \
-%endif
-   driver/Makefile.in
-%__git commit -m "%PATCH_desc" -a
-
-%global PATCH_desc \
 # test-fade: give more time between fading
-sed -i.delay -e 's| delay = 1| delay = 3|' driver/test-fade.c
+sed -i.delay -e 's| delay = 2| delay = 3|' driver/test-fade.c
 %__git commit -m "%PATCH_desc" -a
 
 %global PATCH_desc \
@@ -647,7 +616,9 @@ popd
 CONFIG_OPTS="$CONFIG_OPTS --enable-pam-check-account-type"
 
 # xscreensaver 5.30
+%if 0%{?enable_animation}
 CONFIG_OPTS="$CONFIG_OPTS --with-record-animation"
+%endif
 
 %if 0%{?support_setcap}
 CONFIG_OPTS="$CONFIG_OPTS --with-setcap-hacks"
@@ -680,7 +651,7 @@ pushd po
   cp -p POTFILES.in ..
   # Workaround for ui file
   sed -i ../POTFILES.in POTFILES.in POTFILES \
-     -e '\@-demo\.ui@s|^\([ \t]*\)\(.*\)$|\1[type: gettext/glade]\2|'
+     -e '\@xscreensaver\.ui@s|^\([ \t]*\)\(.*\)$|\1[type: gettext/glade]\2|'
   make xscreensaver.pot srcdir=..
   ( export srcdir=.. ; make update-po )
   rm -f ../POTFILES_in
@@ -690,6 +661,9 @@ popd
 ( cp -p ../po/*.po po/)
 ( ( cd ../po ; git add *.po ; git commit -m "po regenerated" ) || true )
 %endif
+
+# Update po
+#cp -p %{SOURCE100} po/
 
 %if 0%{?use_clang_analyze} >= 1
 %global __make scan-build  --use-analyzer %_bindir/clang -v -v -v -o clang-analyze make
@@ -707,7 +681,9 @@ fi
 # Workaround end
 
 # From 5.45: temporary workaround for installation issue
-cp -p ../driver/xscreensaver-demo.ui driver/
+# From 6.00: temporary workaround for installation issue
+cp -p ../driver/xscreensaver.ui driver/
+cp -a ../hacks/fonts hacks
 
 %if 0%{?use_clang_analyze} < 1
 # Workaround for ppc64 build failure
@@ -826,6 +802,7 @@ dd=%{_builddir}/%{name}-%{mainversion}%{?beta_ver}
 rm -f $dd/*.files
 
 (  cd hacks     ; list_files install ) >  $dd/extras.files
+(  cd hacks/fonts     ; list_files install ) >>  $dd/extras.files
 (  cd hacks/glx ; list_files install ) >  $dd/gl-extras.files
 (  cd driver    ; list_files install ) >  $dd/base.files
 
@@ -834,6 +811,8 @@ sed -i $dd/gl-extras.files \
 	-e '\@sonar$@s|^|%%attr(0755,root,root) %%caps(cap_net_raw=p)|' \
 	%{nil}
 %endif
+# Own directory
+echo "%%dir %{_datadir}/fonts/xscreensaver" >> $dd/extras.files
 
 # Move xscreensaver-gettext-foo, xscreensaver-text to extras-base
 # (bug 668427)
@@ -841,11 +820,13 @@ sed -i $dd/gl-extras.files \
 echo "%%defattr(-,root,root,-)" >> $dd/extras-base.files
 for target in \
    /xscreensaver-getimage \
-   /xscreensaver-text
+   /xscreensaver-text \
+   /fonts/xscreensaver \
+   %{nil}
 do
-   grep -v $target $dd/base.files > $dd/base.files.new
-   grep $target $dd/base.files >> $dd/extras-base.files
-   mv $dd/base.files{.new,}
+   grep -v $target $dd/extras.files > $dd/extras.files.new
+   grep $target $dd/extras.files >> $dd/extras-base.files
+   mv $dd/extras.files{.new,}
 done
 %endif
 
@@ -854,12 +835,8 @@ done
 %if %{modular_conf}
 echo "%%defattr(-,root,root,-)" >> $dd/gl-base.files
 
+grep xscreensaver-gl-visual $dd/gl-extras.files >> $dd/gl-base.files
 sed -i -e '/xscreensaver-gl-helper/d' $dd/gl-extras.files
-pushd $RPM_BUILD_ROOT
-for dir in `find . -name \*xscreensaver-gl-helper\*` ; do
-   echo "${dir#.}" >> $dd/gl-base.files
-done
-popd
 sed -i -e 's|^\(%{_mandir}.*\)$|\1*|' $dd/gl-base.files
 %endif
 
